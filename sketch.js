@@ -37,6 +37,10 @@ function draw() {
 
   playlist.display();
 
+  if (!playlist.getIsPlaying()) {
+    text("hit spacebar to play", -50, 0);
+  }
+
   displayFrameRate();
 }
 

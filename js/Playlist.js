@@ -28,6 +28,14 @@ class Playlist {
     }
   }
 
+  getIsPlaying() {
+    if (this.songs.length > 0) {
+      let currentSong = this.songs[this.currentSongIndex];
+      return currentSong.getIsPlaying();
+    }
+    return false;
+  }
+
   togglePlay() {
     if (this.songs.length > 0) {
       let currentSong = this.songs[this.currentSongIndex];

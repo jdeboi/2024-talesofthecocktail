@@ -5,7 +5,7 @@ class Song {
     this.bpm = bpm;
     this.secondsPerBeat = 60 / bpm;
     this.beatsPerMeasure = beatsPerMeasure;
-    this.audioFile = loadSound("/assets/" + title + ".mp3");
+    this.audioFile = loadSound("assets/" + title + ".mp3");
     this.previousBeat = 0;
   }
 
