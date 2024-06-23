@@ -28,7 +28,7 @@ const modes = [
 const NUM_MODES = modeTemp;
 
 let lastModeChangeTime = 0;
-
+let analyzed = false;
 function cycleMode(dt) {
   if (millis() - lastModeChangeTime > dt) {
     lastModeChangeTime = millis();
@@ -43,7 +43,7 @@ function nextMode() {
 
 function displayMode() {
   if (playlist.getMeasureChanged()) {
-    nextMode();
+    //nextMode();
   }
 
   const modeName = modes[currentMode].name;
@@ -170,7 +170,11 @@ function displayCenterRects() {
 function displayFFTLine() {
   let beat = playlist.getCurrentMeasureBeat();
 
-  if (frameCount % 4 == 0) spectrum = playlist.fft.analyze();
+  if (frameCount % 4 == 0) {
+    // analyzed = true;
+    spectrum = playlist.fft.analyze();
+    console.log("analyze");
+  }
   let numPeriods = 1;
   let numSeconds = playlist.getSecondsPerBeat();
 
@@ -183,35 +187,54 @@ function displayFFTLine() {
     pg.rectMode(CENTER);
     pg.noFill();
     let spacing = 20;
+    let xSpace = 10; // + 5 * sin(millis() / 2000);
     for (let y = 0; y < quadMap.height; y += spacing) {
-      pg.strokeWeight(1);
+      pg.strokeWeight(4);
 
-      for (let i = 0; i < quadMap.width / 2; i += 2) {
+      for (let i = 0; i < quadMap.width / 2; i += xSpace) {
         let x0 = map(i, 0, quadMap.width / 2, quadMap.width / 2, 0);
         let x1 = map(i, 0, quadMap.width / 2, quadMap.width / 2, quadMap.width);
 
-        let strokeC =
-          pMapper.getOscillator(numSeconds, i / 80 + y / 80) * 170 + 85;
-        pg.stroke(constrain(strokeC, 85, 255));
+        // let strokeC = 100;
+
+        let cVal =
+          pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
+        let strokeC = cVal;
+        if (beat % 2 == 0) {
+          strokeC = 255 - cVal;
+        }
+
+        pg.stroke(constrain(strokeC, 100, 255));
         let h = constrain(
           map(spectrum[i * 2], 0, 255, 0, spacing * 2),
           2,
           spacing * 0.8
         );
 
-        if (beat == 0) {
+        if (beat == 1 || beat == 3) {
           pg.line(x0, y + h / 2, x0, y - h / 2);
-          pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        } else if (beat == 1) {
+          pg.line(x1, y + h / 2, x1, y - h / 2);
+        } else if (beat == 0) {
           pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
           pg.line(x1, y + h / 2, x1, y - h / 2);
         } else if (beat == 2) {
           pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
           pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        } else {
-          pg.line(x0, y + h / 2, x0, y - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
         }
+
+        // if (beat == 0) {
+        //   pg.line(x0, y + h / 2, x0, y - h / 2);
+        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
+        // } else if (beat == 1) {
+        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
+        //   pg.line(x1, y + h / 2, x1, y - h / 2);
+        // } else if (beat == 2) {
+        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
+        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
+        // } else {
+        //   pg.line(x0, y + h / 2, x0, y - h / 2);
+        //   pg.line(x1, y + h / 2, x1, y - h / 2);
+        // }
       }
     }
     pg.pop();
