@@ -15,7 +15,7 @@
     ></script>
     <script>
       const socket = io("https://p5-cocktales.vercel.app/", {
-        transports: ["websocket"],
+        transports: ["polling", "websocket"],
       });
 
       // const socket = io("http://localhost:3000/", {
