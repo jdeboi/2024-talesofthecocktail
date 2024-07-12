@@ -33,7 +33,10 @@ function setup() {
   });
 
   // Connect to the socket server using the Vercel URL
-  socket = io("https://p5-cocktales-gqzgrjd9h-jdebois-projects.vercel.app/"); // Replace with your Vercel URL
+  socket = io("https://p5-cocktales-gqzgrjd9h-jdebois-projects.vercel.app/", {
+    transports: ["websocket"],
+  }); // Replace with your Vercel URL
+  // socket = io("http://localhost:3000/", { transports: ["websocket"] });
 
   // Listen for the start event
   socket.on("start", () => {
