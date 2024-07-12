@@ -6,7 +6,7 @@
     <title>Socket Trigger</title>
   </head>
   <body>
-    <button id="startButton">Start</button>
+    <button id="startButton">Start Visuals</button>
 
     <script
       src="https://cdn.socket.io/4.7.5/socket.io.min.js"
@@ -15,6 +15,7 @@
     ></script>
     <script>
       const socket = io("https://p5-cocktales.vercel.app/", {
+        withCredentials: true,
         transports: ["polling", "websocket"],
       });
 
