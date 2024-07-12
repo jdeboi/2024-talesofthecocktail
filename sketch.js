@@ -1,3 +1,5 @@
+let socket;
+
 // projection mapping objects
 let pMapper;
 let quadMap;
@@ -12,7 +14,6 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
-
   textFont(myFont);
 
   pMapper = createProjectionMapper(this);
@@ -29,6 +30,15 @@ function setup() {
       let lineMap = lineMaps[i];
       lineMap.lineW = map(i, 0, 9, 2, 30);
     }
+  });
+
+  // Connect to the socket server using the Vercel URL
+  socket = io("https://p5-cocktales-gqzgrjd9h-jdebois-projects.vercel.app/"); // Replace with your Vercel URL
+
+  // Listen for the start event
+  socket.on("start", () => {
+    console.log("Start command received via socket");
+    playlist.togglePlay(); // Start the playlist
   });
 }
 
@@ -59,7 +69,6 @@ function keyPressed() {
     case "l":
       pMapper.load("maps/map.json");
       break;
-
     case "s":
       pMapper.save("map.json");
       break;
