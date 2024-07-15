@@ -2,13 +2,15 @@ let socket;
 
 // projection mapping objects
 let pMapper;
-let quadMap;
+let quadMap1;
+let quadMap2;
+
 let myFont;
 const lineMaps = [];
 
 function preload() {
   playlist = new Playlist();
-  playlist.addSong(new Song("Lalinea_Midnight_Dreams2", 85, 4, 0.5));
+  playlist.addSong(new Song("Lalinea_Midnight_Dreams3", 85, 4, 0.5));
   myFont = loadFont("assets/Roboto.ttf");
 }
 
@@ -18,7 +20,8 @@ function setup() {
 
   pMapper = createProjectionMapper(this);
 
-  quadMap = pMapper.createQuadMap(800, windowHeight - 100);
+  quadMap1 = pMapper.createQuadMap(800, windowHeight - 100);
+  quadMap2 = pMapper.createQuadMap(800, windowHeight - 100);
 
   for (let i = 0; i < 40; i++) {
     let lineMap = pMapper.createLineMap();
@@ -33,7 +36,7 @@ function setup() {
   });
 
   // Connect to the socket server using the Vercel URL
-  socket = io("https://p5-cocktales.vercel.app/", {
+  socket = io("https://p5-cocktales-f5f9910ea06a.herokuapp.com/", {
     transports: ["websocket"],
   }); // Replace with your Vercel URL
   // socket = io("http://localhost:3000/", { transports: ["websocket"] });
@@ -41,7 +44,12 @@ function setup() {
   // Listen for the start event
   socket.on("start", () => {
     console.log("Start command received via socket");
-    playlist.togglePlay(); // Start the playlist
+    playlist.resetPlay(); // Start the playlist
+  });
+
+  socket.on("stop", () => {
+    console.log("stop command received via socket");
+    playlist.stop(); // Start the playlist
   });
 }
 

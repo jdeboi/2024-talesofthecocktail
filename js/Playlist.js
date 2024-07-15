@@ -36,6 +36,13 @@ class Playlist {
     return false;
   }
 
+  resetPlay() {
+    if (this.songs.length > 0) {
+      let currentSong = this.songs[this.currentSongIndex];
+      currentSong.resetPlay();
+    }
+  }
+
   togglePlay() {
     if (this.songs.length > 0) {
       let currentSong = this.songs[this.currentSongIndex];
@@ -48,6 +55,13 @@ class Playlist {
       }
     } else {
       console.log("No songs in playlist");
+    }
+  }
+
+  stop() {
+    if (this.songs.length > 0) {
+      let currentSong = this.songs[this.currentSongIndex];
+      currentSong.stop();
     }
   }
 

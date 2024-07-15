@@ -13,6 +13,20 @@ class Song {
     this.audioFile.play();
   }
 
+  stop() {
+    if (this.audioFile.isPlaying()) {
+      this.audioFile.pause();
+    }
+  }
+
+  resetPlay() {
+    if (this.audioFile.isPlaying()) {
+      this.audioFile.stop();
+    }
+    this.audioFile.currentTime(0);
+    this.audioFile.play();
+  }
+
   togglePlay() {
     if (this.audioFile.isPlaying()) {
       this.audioFile.pause();
