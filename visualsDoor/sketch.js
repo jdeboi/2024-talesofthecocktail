@@ -9,7 +9,9 @@ let quadLogo;
 let myFont;
 let logo;
 let door;
+let gifImg;
 const lineMaps = [];
+let isPlaying = false;
 
 function preload() {
   playlist = new Playlist();
@@ -17,6 +19,9 @@ function preload() {
   myFont = loadFont("../assets/Roboto.ttf");
   logo = loadImage("../assets/logo.png");
   door = loadImage("../assets/door.jpg");
+  video = createVideo(["../assets/wormhole.mp4"]);
+  video.hide();
+  // gifImg = createImg("../assets/wormhole1.gif");
 }
 
 function setup() {
@@ -73,7 +78,7 @@ function draw() {
     text("visuals door; hit spacebar to play", -50, 0);
   }
 
-  // displayFrameRate();
+  displayFrameRate();
 }
 
 function keyPressed() {
@@ -132,8 +137,8 @@ function setSpectrum() {
 
 function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
   pg.push();
+  pg.translate(x, y);
   pg.rotate(rot);
-  // pg.translate(x, -(y + h));
   let numPeriods = 1;
 
   let numSeconds = playlist.getSecondsPerBeat();
@@ -175,13 +180,9 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
   pg.pop();
 }
 
-function displayFFTLine2() {
+function displayRectWall() {
   const numLines = 30;
   let secPerBeat = playlist.getSecondsPerBeat();
-
-  let beat = playlist.getCurrentMeasureBeat();
-
-  displayLogo();
 
   quadMapWall.displaySketch((pg) => {
     // pg.clear();
@@ -216,31 +217,85 @@ function displayFFTLine2() {
   });
 }
 
+function displayDoorRect(pg) {
+  pg.clear();
+  pg.push();
+  const numLines = 20;
+  for (let i = 0; i < numLines; i++) {
+    let w = map(i, 0, numLines, 10, quadMapDoor.width);
+    let h = (w / quadMapDoor.width) * quadMapDoor.height;
+    let y0 = quadMapDoor.height / 2 - h / 2;
+    let y1 = quadMapDoor.height / 2 + h / 2;
+    let x0 = quadMapDoor.width / 2 - w / 2;
+    let x1 = quadMapDoor.width / 2 + w / 2;
+    displayLine(pg, x0, y0, w, h, 0);
+    displayLine(pg, x0, y1, w, h, 0);
+    // displayLine(pg, 0, 0, quadMapDoor.height, 200, true);
+    // displayLine(pg, 0, 0, quadMapDoor.height, 200, true);
+  }
+
+  pg.pop();
+}
+
 function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
   displayLogo();
 
+  // displayRectWall();
+
+  // if (isPlaying) {
+  //   quadMapDoor.displayTexture(
+  //     video,
+  //     0,
+  //     0,
+  //     quadMapDoor.width,
+  //     quadMapDoor.height
+  //   );
+  // }
+
   quadMapDoor.displaySketch((pg) => {
     pg.clear();
     pg.push();
-    //displayLine(pg, 0, 0, quadMapDoor.height, 200, true);
 
+    if (isPlaying) {
+      pg.image(video, 0, 0, quadMapDoor.width, quadMapDoor.height);
+    }
+
+    pg.noFill();
+    pg.strokeWeight(20);
+    pg.stroke(255);
+    let space = 10;
+    pg.rect(
+      0,
+      0,
+      (quadMapDoor.width * 19) / 20,
+      (quadMapDoor.height * 19) / 20
+    );
     pg.pop();
   });
 
+  // quadMapDoor.displaySketch((pg) => {
+  //   displayDoorRect(pg);
+  // });
+
   quadMapWall.displaySketch((pg) => {
-    const numLines = 30;
+    // displayLine(pg, 0, 0, quadMapDoor.height, 200, 0);
+    const numLines = 36;
+    let h = quadMapWall.height / numLines;
     pg.clear();
     pg.push();
-    pg.translate(0, quadMapWall.height / 2);
+
     for (let i = 0; i < numLines; i++) {
-      let h = 30;
       let y = i * h;
-      let rot = map(i, 0, numLines, -PI, PI);
-      displayLine(pg, 0, y, quadMapWall.width / 2, h, rot);
+      displayLine(pg, 0, y, quadMapWall.width, h);
     }
     pg.pop();
   });
+}
+
+function mousePressed() {
+  isPlaying = true;
+  video.loop();
 }

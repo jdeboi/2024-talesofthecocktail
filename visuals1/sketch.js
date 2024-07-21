@@ -2,8 +2,10 @@ let socket;
 
 // projection mapping objects
 let pMapper;
-let quadMap1;
-let quadMap2;
+
+let quadStairs;
+let quadSmall;
+let quadLogo;
 
 let myFont;
 let logo;
@@ -22,11 +24,11 @@ function setup() {
 
   pMapper = createProjectionMapper(this);
 
-  quadMapWall = pMapper.createQuadMap(800, windowHeight - 100);
-  quadLogo = pMapper.createQuadMap(800, 400);
-  quadMap3 = pMapper.createQuadMap(300, 80);
+  quadStairs = pMapper.createQuadMap(800, windowHeight - 100);
+  quadSmall = pMapper.createQuadMap(800, 400);
+  quadLogo = pMapper.createQuadMap(300, 80);
 
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 2; i++) {
     let lineMap = pMapper.createLineMap();
     lineMaps.push(lineMap);
   }
@@ -61,11 +63,11 @@ function draw() {
 
   playlist.display();
 
-  if (!playlist.getIsPlaying()) {
-    text("visuals 1; hit spacebar to play", -50, 0);
-  }
+  // if (!playlist.getIsPlaying()) {
+  //   text("visuals 1; hit spacebar to play", -50, 0);
+  // }
 
-  // displayFrameRate();
+  displayFrameRate();
 }
 
 function keyPressed() {
@@ -99,18 +101,9 @@ function displayFrameRate() {
   text(round(frameRate()), -width / 2 + 15, -height / 2 + 50);
 }
 
-function displayFFTLine() {
-  let beat = playlist.getCurrentMeasureBeat();
-
-  if (frameCount % 4 == 0) {
-    spectrum = playlist.fft.analyze();
-  }
-  let numPeriods = 1;
+function displayLogo() {
   let numSeconds = playlist.getSecondsPerBeat();
-
-  if (spectrum.length == 0) return;
-
-  quadMap3.displaySketch((pg) => {
+  quadLogo.displaySketch((pg) => {
     pg.push();
     pg.clear();
 
@@ -123,136 +116,87 @@ function displayFFTLine() {
     pg.rect(0, 0, pg.width, pg.height);
     pg.pop();
   });
+}
 
-  quadMapWall.displaySketch((pg) => {
-    // pg.clear();
+function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
+  pg.push();
+  pg.rotate(rot);
+  pg.translate(x, y);
+  let numPeriods = 1;
+
+  let numSeconds = playlist.getSecondsPerBeat();
+  let xSpace = 10; // + 5 * sin(millis() / 2000);
+  let beat = playlist.getCurrentMeasureBeat();
+
+  pg.strokeWeight(4);
+
+  for (let i = 0; i < w / 2; i += xSpace) {
+    let x0 = map(i, 0, w / 2, w / 2, 0);
+    let x1 = map(i, 0, w / 2, w / 2, w);
+
+    let cVal =
+      pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
+    let strokeC = cVal;
+    if (beat % 2 == 0) {
+      strokeC = 255 - cVal;
+    }
+
+    pg.stroke(constrain(strokeC, 100, 255));
+    let scaleHFactor = map(h, 20, 400, 2, 1, true);
+    let hLine = constrain(
+      map(spectrum[i * 2], 0, 255, 0, h * scaleHFactor),
+      2,
+      h * 0.8
+    );
+
+    if (beat == 1 || beat == 3) {
+      pg.line(x0, hLine / 2, x0, -hLine / 2);
+      pg.line(x1, hLine / 2, x1, -hLine / 2);
+    } else if (beat == 0) {
+      pg.line(x0, hLine / 2, x0, hLine * 0.8 - hLine / 2);
+      pg.line(x1, hLine / 2, x1, -hLine / 2);
+    } else if (beat == 2) {
+      pg.line(x0, hLine / 2, x0, hLine * 0.8 - hLine / 2);
+      pg.line(x1, hLine / 2, x1, hLine * 0.8 - hLine / 2);
+    }
+  }
+  pg.pop();
+}
+
+function setSpectrum() {
+  if (frameCount % 4 == 0) {
+    spectrum = playlist.fft.analyze();
+  }
+}
+
+function displayFFTLine() {
+  setSpectrum();
+  if (spectrum.length == 0) return;
+
+  displayLogo();
+
+  quadStairs.displaySketch((pg) => {
+    const numLines = 36;
+    let h = quadStairs.height / numLines;
+    pg.clear();
     pg.push();
-    // pg.background(0, 10);
-    pg.stroke(255);
-    pg.rectMode(CENTER);
-    pg.noFill();
-    let spacing = 20;
-    let xSpace = 10; // + 5 * sin(millis() / 2000);
-    for (let y = 0; y < quadMapWall.height; y += spacing) {
-      pg.strokeWeight(4);
 
-      for (let i = 0; i < quadMapWall.width / 2; i += xSpace) {
-        let x0 = map(i, 0, quadMapWall.width / 2, quadMapWall.width / 2, 0);
-        let x1 = map(
-          i,
-          0,
-          quadMapWall.width / 2,
-          quadMapWall.width / 2,
-          quadMapWall.width
-        );
-
-        // let strokeC = 100;
-
-        let cVal =
-          pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
-        let strokeC = cVal;
-        if (beat % 2 == 0) {
-          strokeC = 255 - cVal;
-        }
-
-        pg.stroke(constrain(strokeC, 100, 255));
-        let h = constrain(
-          map(spectrum[i * 2], 0, 255, 0, spacing * 2),
-          2,
-          spacing * 0.8
-        );
-
-        if (beat == 1 || beat == 3) {
-          pg.line(x0, y + h / 2, x0, y - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 0) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 2) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        }
-
-        // if (beat == 0) {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else if (beat == 1) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // } else if (beat == 2) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // }
-      }
+    for (let i = 0; i < numLines; i++) {
+      let y = i * h;
+      displayLine(pg, 0, y, quadStairs.width, h);
     }
     pg.pop();
   });
-  quadLogo.displaySketch((pg) => {
-    // pg.clear();
+
+  quadSmall.displaySketch((pg) => {
+    const numLines = 4;
+    let h = quadSmall.height / numLines;
+    pg.clear();
     pg.push();
-    // pg.background(0, 10);
-    pg.stroke(255);
-    pg.rectMode(CENTER);
-    pg.noFill();
-    let spacing = 20;
-    let xSpace = 10; // + 5 * sin(millis() / 2000);
-    for (let y = 0; y < quadMapWall.height; y += spacing) {
-      pg.strokeWeight(4);
-
-      for (let i = 0; i < quadMapWall.width / 2; i += xSpace) {
-        let x0 = map(i, 0, quadMapWall.width / 2, quadMapWall.width / 2, 0);
-        let x1 = map(
-          i,
-          0,
-          quadMapWall.width / 2,
-          quadMapWall.width / 2,
-          quadMapWall.width
-        );
-
-        // let strokeC = 100;
-
-        let cVal =
-          pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
-        let strokeC = cVal;
-        if (beat % 2 == 0) {
-          strokeC = 255 - cVal;
-        }
-
-        pg.stroke(255); //constrain(strokeC, 100, 255));
-        let h = constrain(
-          map(spectrum[i * 2], 0, 255, 0, spacing * 2),
-          2,
-          spacing * 0.8
-        );
-
-        if (beat == 1 || beat == 3) {
-          pg.line(x0, y + h / 2, x0, y - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 0) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 2) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        }
-
-        // if (beat == 0) {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else if (beat == 1) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // } else if (beat == 2) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // }
-      }
+    pg.translate(0, 0);
+    for (let i = 0; i < numLines; i++) {
+      let y = i * h;
+      displayLine(pg, 0, y, quadSmall.width, h);
     }
     pg.pop();
   });

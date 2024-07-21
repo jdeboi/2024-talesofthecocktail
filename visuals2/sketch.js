@@ -13,7 +13,8 @@ const NUM_STEPS = 4;
 function preload() {
   playlist = new Playlist();
   playlist.addSong(new Song("Lalinea_Midnight_Dreams3", 85, 4, 0.5));
-  myFont = loadFont("/assets/Roboto.ttf");
+  myFont = loadFont("../assets/Roboto.ttf");
+  logo = loadImage("../assets/logo.png");
 }
 
 function setup() {
@@ -24,10 +25,10 @@ function setup() {
 
   quadMap1 = pMapper.createQuadMap(windowWidth, windowHeight);
 
-  for (let i = 0; i < NUM_STEPS; i++) {
-    let lineMap = pMapper.createLineMap();
-    lineMaps.push(lineMap);
-  }
+  // for (let i = 0; i < NUM_STEPS; i++) {
+  //   let lineMap = pMapper.createLineMap();
+  //   lineMaps.push(lineMap);
+  // }
 
   pMapper.load("maps/map.json", () => {
     for (let i = 0; i < lineMaps.length; i++) {
@@ -58,10 +59,6 @@ function draw() {
   background(0);
 
   playlist.display();
-
-  if (!playlist.getIsPlaying()) {
-    text("visuals 2; hit spacebar to play", -50, 0);
-  }
 
   displayFrameRate();
 }
@@ -97,83 +94,102 @@ function displayFrameRate() {
   text(round(frameRate()), -width / 2 + 15, -height / 2 + 50);
 }
 
-function displayFFTLine() {
+function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
+  pg.push();
+
+  pg.rotate(rot);
+  pg.translate(x, y);
+  let numPeriods = 1;
+
+  let numSeconds = playlist.getSecondsPerBeat();
+  let xSpace = 10; // + 5 * sin(millis() / 2000);
   let beat = playlist.getCurrentMeasureBeat();
 
+  pg.strokeWeight(4);
+
+  for (let i = 0; i < w / 2; i += xSpace) {
+    let x0 = map(i, 0, w / 2, w / 2, 0);
+    let x1 = map(i, 0, w / 2, w / 2, w);
+
+    let cVal =
+      pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
+    let strokeC = cVal;
+    if (beat % 2 == 0) {
+      strokeC = 255 - cVal;
+    }
+
+    pg.stroke(constrain(strokeC, 100, 255));
+    let scaleHFactor = map(h, 20, 400, 2, 1, true);
+    let hLine = constrain(
+      map(spectrum[i * 2], 0, 255, 0, h * scaleHFactor),
+      2,
+      h * 0.8
+    );
+
+    if (beat == 1 || beat == 3) {
+      pg.line(x0, hLine / 2, x0, -hLine / 2);
+      pg.line(x1, hLine / 2, x1, -hLine / 2);
+    } else if (beat == 0) {
+      pg.line(x0, hLine / 2, x0, hLine * 0.8 - hLine / 2);
+      pg.line(x1, hLine / 2, x1, -hLine / 2);
+    } else if (beat == 2) {
+      pg.line(x0, hLine / 2, x0, hLine * 0.8 - hLine / 2);
+      pg.line(x1, hLine / 2, x1, hLine * 0.8 - hLine / 2);
+    }
+  }
+  pg.pop();
+}
+
+function setSpectrum() {
   if (frameCount % 4 == 0) {
     spectrum = playlist.fft.analyze();
   }
-  let numPeriods = 1;
-  let numSeconds = playlist.getSecondsPerBeat();
+}
 
+function displayLogo() {
+  let numSeconds = playlist.getSecondsPerBeat();
+  quadLogo.displaySketch((pg) => {
+    pg.push();
+    pg.clear();
+
+    let factor = 0.25;
+    let cVal = pMapper.getOscillator(numSeconds * 4, 0);
+
+    pg.image(logo, 0, -2, 1000 * factor, 331 * factor);
+    pg.noStroke();
+    pg.fill(0, cVal * 255);
+    pg.rect(0, 0, pg.width, pg.height);
+    pg.pop();
+  });
+}
+
+function displayFFTLine() {
+  setSpectrum();
   if (spectrum.length == 0) return;
 
+  // displayLogo();
+
   quadMap1.displaySketch((pg) => {
+    const numLines = 36;
+    // let h = quadMap1.height / numLines;
     // pg.clear();
+    // pg.push();
+
+    // for (let i = 0; i < numLines; i++) {
+    //   let y = i * h;
+    //   displayLine(pg, 0, y, quadMap1.width, h);
+    // }
+
+    pg.clear();
     pg.push();
-    // pg.background(0, 10);
-    pg.stroke(255);
-    pg.rectMode(CENTER);
-    pg.noFill();
-
-    let spacing = quadMap1.height / NUM_STEPS;
-    let xSpace = 10; // + 5 * sin(millis() / 2000);
-    pg.translate(0, spacing / 2);
-    for (let y = 0; y <= quadMap1.height; y += spacing) {
-      pg.strokeWeight(4);
-
-      for (let i = 0; i < quadMap1.width / 2; i += xSpace) {
-        let x0 = map(i, 0, quadMap1.width / 2, quadMap1.width / 2, 0);
-        let x1 = map(
-          i,
-          0,
-          quadMap1.width / 2,
-          quadMap1.width / 2,
-          quadMap1.width
-        );
-
-        // let strokeC = 100;
-
-        let cVal =
-          pMapper.getOscillator(numSeconds * 4, i / 80 + y / 80) * 170 + 85;
-        let strokeC = cVal;
-        if (beat % 2 == 0) {
-          strokeC = 255 - cVal;
-        }
-
-        pg.stroke(255); // constrain(strokeC, 100, 255));
-        let h = constrain(
-          map(spectrum[i * 2], 0, 255, 0, spacing * 2),
-          2,
-          spacing * 0.8
-        );
-
-        if (beat == 1 || beat == 3) {
-          pg.line(x0, y + h / 2, x0, y - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 0) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y - h / 2);
-        } else if (beat == 2) {
-          pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-          pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        }
-
-        // if (beat == 0) {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else if (beat == 1) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // } else if (beat == 2) {
-        //   pg.line(x0, y + h / 2, x0, y + h * 0.8 - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y + h * 0.8 - h / 2);
-        // } else {
-        //   pg.line(x0, y + h / 2, x0, y - h / 2);
-        //   pg.line(x1, y + h / 2, x1, y - h / 2);
-        // }
-      }
+    pg.translate(quadMap1.width / 2, quadMap1.height / 2);
+    for (let i = 0; i < numLines; i++) {
+      let h = 30;
+      let y = i * h;
+      let rot = map(i, 0, numLines, -PI, PI);
+      displayLine(pg, 0, 0, quadMap1.width / 4, h, rot);
     }
     pg.pop();
+    // pg.pop();
   });
 }
