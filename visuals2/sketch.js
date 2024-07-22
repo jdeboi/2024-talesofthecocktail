@@ -27,7 +27,7 @@ function setup() {
 
   pMapper = createProjectionMapper(this);
 
-  quadOutline = pMapper.createQuadMap(1200, 800);
+  // quadOutline = pMapper.createQuadMap(1200, 800);
 
   quadMap1 = pMapper.createQuadMap(800, 800);
   quadMapScript = pMapper.createQuadMap(900, 500);
