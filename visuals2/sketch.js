@@ -181,6 +181,14 @@ function displayScript() {
 
     pg.pop();
 
+    for (let i = 0; i < quadMapScript.width; i++) {
+      let cVal = pMapper.getOscillator(numSeconds * 2, i / 200);
+
+      pg.strokeWeight(1);
+      pg.stroke(0, cVal * 255);
+      pg.line(i, 0, i, quadMapScript.height);
+    }
+
     //pg.image(logo, 0, -2, 1000 * factor, 331 * factor);
     // pg.noStroke();
     // pg.fill(0, cVal * 255);
@@ -235,7 +243,7 @@ function displayOutline() {
 function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
-
+  displayScript();
   quadMap1.displaySketch((pg) => {
     // pg.clear();
     // pg.push();
@@ -267,6 +275,5 @@ function displayFFTLine() {
     pg.pop();
   });
 
-  displayScript();
-  displayOutline();
+  // displayOutline();
 }
