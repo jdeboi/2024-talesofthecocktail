@@ -236,8 +236,6 @@ function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
-  displayOutline();
-
   quadMap1.displaySketch((pg) => {
     // pg.clear();
     // pg.push();
@@ -270,4 +268,5 @@ function displayFFTLine() {
   });
 
   displayScript();
+  displayOutline();
 }
