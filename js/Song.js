@@ -7,7 +7,7 @@ class Song {
     this.beatsPerMeasure = beatsPerMeasure;
     this.audioFile = loadSound("../assets/" + title + ".mp3");
     this.previousBeat = 0;
-    // this.audioFile.setVolume(0);
+    // this.audioFile.setVolume(0.1);
   }
 
   play() {

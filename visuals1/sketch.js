@@ -7,8 +7,6 @@ let quadStairs;
 let quadSmall;
 let quadLogo;
 
-let spectrum = [];
-
 let myFont;
 let logo;
 const lineMaps = [];

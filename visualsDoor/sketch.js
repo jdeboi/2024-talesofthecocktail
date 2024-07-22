@@ -236,7 +236,7 @@ function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
-  displayScript();
+  // displayScript();
 
   // displayRectWall();
 

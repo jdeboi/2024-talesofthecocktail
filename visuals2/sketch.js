@@ -4,6 +4,8 @@ let socket;
 let pMapper;
 let quadMap1;
 let quadMapScript;
+let quadOutline;
+let isFlipped = false;
 
 let myFont;
 let scriptFont;
@@ -25,13 +27,10 @@ function setup() {
 
   pMapper = createProjectionMapper(this);
 
-  quadMap1 = pMapper.createQuadMap(windowWidth, windowHeight);
-  quadMapScript = pMapper.createQuadMap(900, 500);
+  quadOutline = pMapper.createQuadMap(1200, 800);
 
-  // for (let i = 0; i < NUM_STEPS; i++) {
-  //   let lineMap = pMapper.createLineMap();
-  //   lineMaps.push(lineMap);
-  // }
+  quadMap1 = pMapper.createQuadMap(800, 800);
+  quadMapScript = pMapper.createQuadMap(900, 500);
 
   pMapper.load("maps/map.json", () => {});
 
@@ -55,7 +54,7 @@ function setup() {
 
 function draw() {
   background(0);
-  if (mouseIsPressed) {
+  if (isFlipped) {
     scale(-1, -1);
   }
 
@@ -81,6 +80,9 @@ function keyPressed() {
       break;
     case "s":
       pMapper.save("map.json");
+      break;
+    case "p":
+      isFlipped = !isFlipped;
       break;
   }
 }
@@ -167,15 +169,15 @@ function displayScript() {
     pg.textFont(scriptFont, 500);
     pg.push();
     pg.clear();
-    pg.background(0);
+    // pg.background(0);
     pg.push();
     pg.noStroke();
-    pg.fill(255, cVal * 255);
+    pg.fill(255); //, cVal * 255
     pg.scale(-1, -1);
     pg.translate((-quadMapScript.width * 19) / 20, -quadMapScript.height / 2);
-    pg.text("exit", 20, 130);
+    pg.text("exit", 20, 90);
     pg.textFont(scriptFont, 140);
-    pg.text("Sweet Dreams...", 120, 280);
+    pg.text("Sweet Dreams...", 120, 240);
 
     pg.pop();
 
@@ -187,16 +189,61 @@ function displayScript() {
   });
 }
 
+function displayOutline() {
+  let numSeconds = playlist.getSecondsPerBeat();
+  quadOutline.displaySketch((pg) => {
+    pg.clear();
+
+    // outline rect
+    // pg.noFill();
+    // pg.strokeWeight(15);
+    // pg.stroke(255);
+    // pg.rect(
+    //   0,
+    //   0,
+    //   quadOutline.width * (19 / 20),
+    //   quadOutline.height * (19 / 20)
+    // );
+
+    // outline spectrum
+    let h = 100;
+    displayLine(pg, 0, 0, quadOutline.width, h, 0);
+    displayLine(pg, 0, quadOutline.height * (19 / 20), quadOutline.width, h, 0);
+
+    displayLine(pg, 0, -3, quadOutline.height, h, PI / 2);
+    displayLine(
+      pg,
+      0,
+      (-quadOutline.width * 19) / 20,
+      quadOutline.height,
+      h,
+      PI / 2
+    );
+
+    // displayLine(pg, 0, quadOutline.height * (19 / 20), quadOutline.width, h, 0);
+
+    for (let i = 0; i < quadOutline.width; i++) {
+      let cVal = pMapper.getOscillator(numSeconds * 2, i / 200);
+
+      pg.strokeWeight(1);
+      pg.stroke(0, cVal * 255);
+      pg.line(i, 0, i, quadOutline.height);
+    }
+  });
+}
+
 function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
+  displayOutline();
+
   quadMap1.displaySketch((pg) => {
-    pg.clear();
-    pg.push();
-    let h = 100;
-    displayLine(pg, 0, h / 2, quadMap1.width, h, mouseX / 1000);
-    pg.pop();
+    // pg.clear();
+    // pg.push();
+    // let h = 100;
+    // displayLine(pg, 0, h / 2, quadMap1.width, h, mouseX / 1000);
+    // pg.pop();
 
     // const numLines = 36;
     // let h = quadMap1.height / numLines;
@@ -209,16 +256,17 @@ function displayFFTLine() {
     // }
     // pg.pop();
 
-    // pg.clear();
-    // pg.push();
-    // pg.translate(quadMap1.width / 2, quadMap1.height / 2);
-    // for (let i = 0; i < numLines; i++) {
-    //   let h = 30;
-    //   let y = i * h;
-    //   let rot = map(i, 0, numLines, -PI, PI);
-    //   displayLine(pg, 0, 0, quadMap1.width / 4, h, rot);
-    // }
-    // pg.pop();
+    const numLines = 36;
+    pg.clear();
+    pg.push();
+    pg.translate(quadMap1.width / 2, quadMap1.height / 2);
+    for (let i = 0; i < numLines; i++) {
+      let h = 30;
+      let y = i * h;
+      let rot = map(i, 0, numLines, -PI, PI);
+      displayLine(pg, 0, 0, (quadMap1.width / 2) * (18 / 20), h, rot);
+    }
+    pg.pop();
   });
 
   displayScript();
