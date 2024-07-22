@@ -40,12 +40,7 @@ function setup() {
   //   lineMaps.push(lineMap);
   // }
 
-  pMapper.load("maps/map.json", () => {
-    // for (let i = 0; i < lineMaps.length; i++) {
-    //   let lineMap = lineMaps[i];
-    //   lineMap.lineW = map(i, 0, 9, 2, 30);
-    // }
-  });
+  pMapper.load("maps/map.json", () => {});
 
   // Connect to the socket server using the Vercel URL
   socket = io("https://p5-cocktales-f5f9910ea06a.herokuapp.com/", {
@@ -69,16 +64,16 @@ function draw() {
   background(0);
   push();
   translate(-width / 2, -height / 2);
-  image(door, 0, 0, width, door.height * (width / door.width));
+  //image(door, 0, 0, width, door.height * (width / door.width));
   pop();
 
   playlist.display();
 
-  if (!playlist.getIsPlaying()) {
-    text("visuals door; hit spacebar to play", -50, 0);
-  }
+  // if (!playlist.getIsPlaying()) {
+  //   text("visuals door; hit spacebar to play", -50, 0);
+  // }
 
-  displayFrameRate();
+  // displayFrameRate();
 }
 
 function keyPressed() {
@@ -112,7 +107,7 @@ function displayFrameRate() {
   text(round(frameRate()), -width / 2 + 15, -height / 2 + 50);
 }
 
-function displayLogo() {
+function displayScript() {
   let numSeconds = playlist.getSecondsPerBeat();
   quadLogo.displaySketch((pg) => {
     pg.push();
@@ -241,7 +236,7 @@ function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
-  displayLogo();
+  displayScript();
 
   // displayRectWall();
 
@@ -254,27 +249,6 @@ function displayFFTLine() {
   //     quadMapDoor.height
   //   );
   // }
-
-  quadMapDoor.displaySketch((pg) => {
-    pg.clear();
-    pg.push();
-
-    if (isPlaying) {
-      pg.image(video, 0, 0, quadMapDoor.width, quadMapDoor.height);
-    }
-
-    pg.noFill();
-    pg.strokeWeight(20);
-    pg.stroke(255);
-    let space = 10;
-    pg.rect(
-      0,
-      0,
-      (quadMapDoor.width * 19) / 20,
-      (quadMapDoor.height * 19) / 20
-    );
-    pg.pop();
-  });
 
   // quadMapDoor.displaySketch((pg) => {
   //   displayDoorRect(pg);
@@ -291,6 +265,30 @@ function displayFFTLine() {
       let y = i * h;
       displayLine(pg, 0, y, quadMapWall.width, h);
     }
+    pg.pop();
+  });
+
+  quadMapDoor.displaySketch((pg) => {
+    pg.clear();
+    pg.push();
+
+    if (isPlaying) {
+      let h = quadMapDoor.height;
+      let w = (h * video.width) / video.height;
+      let x = (quadMapDoor.width - w) / 2;
+      pg.image(video, x, 0, w, h);
+    }
+
+    pg.noFill();
+    pg.strokeWeight(20);
+    pg.stroke(255);
+    let space = 10;
+    pg.rect(
+      0,
+      0,
+      (quadMapDoor.width * 19) / 20,
+      (quadMapDoor.height * 19) / 20
+    );
     pg.pop();
   });
 }

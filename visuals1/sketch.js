@@ -7,6 +7,8 @@ let quadStairs;
 let quadSmall;
 let quadLogo;
 
+let spectrum = [];
+
 let myFont;
 let logo;
 const lineMaps = [];
@@ -67,7 +69,7 @@ function draw() {
   //   text("visuals 1; hit spacebar to play", -50, 0);
   // }
 
-  displayFrameRate();
+  // displayFrameRate();
 }
 
 function keyPressed() {
@@ -101,7 +103,7 @@ function displayFrameRate() {
   text(round(frameRate()), -width / 2 + 15, -height / 2 + 50);
 }
 
-function displayLogo() {
+function displayScript() {
   let numSeconds = playlist.getSecondsPerBeat();
   quadLogo.displaySketch((pg) => {
     pg.push();
@@ -173,7 +175,7 @@ function displayFFTLine() {
   setSpectrum();
   if (spectrum.length == 0) return;
 
-  displayLogo();
+  displayScript();
 
   quadStairs.displaySketch((pg) => {
     const numLines = 36;
