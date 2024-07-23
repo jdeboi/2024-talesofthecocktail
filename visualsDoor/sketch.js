@@ -156,7 +156,7 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
       strokeC = 255 - cVal;
     }
 
-    pg.stroke(constrain(strokeC, 150, 255));
+    pg.stroke(constrain(strokeC, 120, 255));
     let scaleHFactor = map(h, 20, 400, 2, 1, true);
     if (!spectrum[i * 2]) {
       spectrum[i * 2] = 0;
@@ -194,7 +194,7 @@ function displayFFTLine() {
 }
 
 function displayWall() {
-  const numLines = 10;
+  const numLines = 20;
   let h = quadMapWall.height / numLines;
   wallPG.clear();
   wallPG.push();
