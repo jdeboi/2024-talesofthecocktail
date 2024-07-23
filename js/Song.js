@@ -11,7 +11,9 @@ class Song {
   }
 
   play() {
-    this.audioFile.play();
+    if (!this.audioFile.isPlaying()) {
+      this.audioFile.play();
+    }
   }
 
   stop() {

@@ -2,10 +2,10 @@ let socket;
 
 // projection mapping objects
 let pMapper;
-
+let isDisplayFrameRate = false;
 let quadStairs;
 let quadSmall;
-let quadLogo;
+// let quadLogo;
 
 let myFont;
 let logo;
@@ -28,17 +28,7 @@ function setup() {
   quadSmall = pMapper.createQuadMap(800, 400);
   quadLogo = pMapper.createQuadMap(300, 80);
 
-  for (let i = 0; i < 2; i++) {
-    let lineMap = pMapper.createLineMap();
-    lineMaps.push(lineMap);
-  }
-
-  pMapper.load("maps/map.json", () => {
-    for (let i = 0; i < lineMaps.length; i++) {
-      let lineMap = lineMaps[i];
-      lineMap.lineW = map(i, 0, 9, 2, 30);
-    }
-  });
+  pMapper.load("maps/map.json", () => {});
 
   // Connect to the socket server using the Vercel URL
   socket = io("https://p5-cocktales-f5f9910ea06a.herokuapp.com/", {
@@ -56,6 +46,16 @@ function setup() {
     console.log("stop command received via socket");
     playlist.stop(); // Start the playlist
   });
+
+  socket.on("volumedown", () => {
+    console.log("volumedown");
+    playlist.volumeDown(); // Start the playlist
+  });
+
+  socket.on("volumeup", () => {
+    console.log("volumeup");
+    playlist.volumeUp(); // Start the playlist
+  });
 }
 
 function draw() {
@@ -67,7 +67,9 @@ function draw() {
   //   text("visuals 1; hit spacebar to play", -50, 0);
   // }
 
-  // displayFrameRate();
+  if (isDisplayFrameRate) {
+    displayFrameRate();
+  }
 }
 
 function keyPressed() {
@@ -87,6 +89,9 @@ function keyPressed() {
       break;
     case "s":
       pMapper.save("map.json");
+      break;
+    case "r":
+      isDisplayFrameRate = !isDisplayFrameRate;
       break;
   }
 }
@@ -143,6 +148,9 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
 
     pg.stroke(constrain(strokeC, 100, 255));
     let scaleHFactor = map(h, 20, 400, 2, 1, true);
+    if (!spectrum[i * 2]) {
+      spectrum[i * 2] = 0;
+    }
     let hLine = constrain(
       map(spectrum[i * 2], 0, 255, 0, h * scaleHFactor),
       2,
@@ -164,7 +172,7 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
 }
 
 function setSpectrum() {
-  if (frameCount % 4 == 0) {
+  if (frameCount % 5 == 0) {
     spectrum = playlist.fft.analyze();
   }
 }

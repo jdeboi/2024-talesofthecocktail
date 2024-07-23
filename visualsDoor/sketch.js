@@ -6,6 +6,11 @@ let quadMapWall;
 let quadMapDoor;
 let quadLogo;
 
+let isShowingFrameRate = false;
+
+let doorPG;
+let wallPG;
+
 let myFont;
 let logo;
 let door;
@@ -15,12 +20,15 @@ let isPlaying = false;
 
 function preload() {
   playlist = new Playlist();
-  playlist.addSong(new Song("Lalinea_Midnight_Dreams2", 85, 4, 0.5));
+  playlist.addSong(new Song("Lalinea_Midnight_Dreams3", 85, 4, 0.5));
   myFont = loadFont("../assets/Roboto.ttf");
   logo = loadImage("../assets/logo.png");
   door = loadImage("../assets/door.jpg");
   video = createVideo(["../assets/wormhole.mp4"]);
   video.hide();
+
+  doorPG = createGraphics(360, 800);
+  wallPG = createGraphics(900, 900);
   // gifImg = createImg("../assets/wormhole1.gif");
 }
 
@@ -62,18 +70,10 @@ function setup() {
 
 function draw() {
   background(0);
-  push();
-  translate(-width / 2, -height / 2);
-  //image(door, 0, 0, width, door.height * (width / door.width));
-  pop();
 
   playlist.display();
 
-  // if (!playlist.getIsPlaying()) {
-  //   text("visuals door; hit spacebar to play", -50, 0);
-  // }
-
-  // displayFrameRate();
+  if (isShowingFrameRate) displayFrameRate();
 }
 
 function keyPressed() {
@@ -93,6 +93,9 @@ function keyPressed() {
       break;
     case "s":
       pMapper.save("map.json");
+      break;
+    case "r":
+      isShowingFrameRate = !isShowingFrameRate;
       break;
   }
 }
@@ -125,7 +128,7 @@ function displayScript() {
 }
 
 function setSpectrum() {
-  if (frameCount % 4 == 0) {
+  if (frameCount % 7 == 0) {
     spectrum = playlist.fft.analyze();
   }
 }
@@ -153,8 +156,11 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
       strokeC = 255 - cVal;
     }
 
-    pg.stroke(constrain(strokeC, 100, 255));
+    pg.stroke(constrain(strokeC, 150, 255));
     let scaleHFactor = map(h, 20, 400, 2, 1, true);
+    if (!spectrum[i * 2]) {
+      spectrum[i * 2] = 0;
+    }
     let hLine = constrain(
       map(spectrum[i * 2], 0, 255, 0, h * scaleHFactor),
       2,
@@ -175,122 +181,48 @@ function displayLine(pg, x = 0, y = 0, w = 200, h = 20, rot = 0) {
   pg.pop();
 }
 
-function displayRectWall() {
-  const numLines = 30;
-  let secPerBeat = playlist.getSecondsPerBeat();
-
-  quadMapWall.displaySketch((pg) => {
-    // pg.clear();
-    pg.push();
-    // pg.background(0, 10);
-    //pg.rectMode(CENTER);
-    pg.noFill();
-
-    for (let i = 0; i < numLines; i++) {
-      let numPeriods = 1;
-      let spacing = 50;
-      let maxW = spacing * numLines;
-
-      let dSpace = spacing * i + frameCount;
-      dSpace %= spacing * numLines;
-      let w = maxW - (36 + dSpace);
-      let h = (80 * w) / 36;
-      let x = 0;
-      let y = height - h;
-
-      let offset = map(i, 0, numLines, 0, 2 * PI * numPeriods);
-      let percent = pMapper.getOscillator(secPerBeat * 4, offset);
-      // let c = color(percent * 255);
-      let c = color(map(w, 0, maxW * 0.8, 255, 0, true));
-      pg.stroke(c);
-      pg.strokeWeight(percent * 20);
-
-      pg.rect(x, y, w, h);
-    }
-
-    pg.pop();
-  });
-}
-
-function displayDoorRect(pg) {
-  pg.clear();
-  pg.push();
-  const numLines = 20;
-  for (let i = 0; i < numLines; i++) {
-    let w = map(i, 0, numLines, 10, quadMapDoor.width);
-    let h = (w / quadMapDoor.width) * quadMapDoor.height;
-    let y0 = quadMapDoor.height / 2 - h / 2;
-    let y1 = quadMapDoor.height / 2 + h / 2;
-    let x0 = quadMapDoor.width / 2 - w / 2;
-    let x1 = quadMapDoor.width / 2 + w / 2;
-    displayLine(pg, x0, y0, w, h, 0);
-    displayLine(pg, x0, y1, w, h, 0);
-    // displayLine(pg, 0, 0, quadMapDoor.height, 200, true);
-    // displayLine(pg, 0, 0, quadMapDoor.height, 200, true);
-  }
-
-  pg.pop();
-}
-
 function displayFFTLine() {
   setSpectrum();
+
   if (spectrum.length == 0) return;
 
-  // displayScript();
+  displayWall();
+  quadMapWall.displayTexture(wallPG);
 
-  // displayRectWall();
+  displayDoor();
+  quadMapDoor.displayTexture(doorPG);
+}
 
-  // if (isPlaying) {
-  //   quadMapDoor.displayTexture(
-  //     video,
-  //     0,
-  //     0,
-  //     quadMapDoor.width,
-  //     quadMapDoor.height
-  //   );
-  // }
+function displayWall() {
+  const numLines = 10;
+  let h = quadMapWall.height / numLines;
+  wallPG.clear();
+  wallPG.push();
 
-  // quadMapDoor.displaySketch((pg) => {
-  //   displayDoorRect(pg);
-  // });
+  for (let i = 0; i < numLines; i++) {
+    let y = i * h;
+    displayLine(wallPG, 0, y, wallPG.width, h);
+  }
+  wallPG.pop();
+}
 
-  quadMapWall.displaySketch((pg) => {
-    // displayLine(pg, 0, 0, quadMapDoor.height, 200, 0);
-    const numLines = 36;
-    let h = quadMapWall.height / numLines;
-    pg.clear();
-    pg.push();
+function displayDoor() {
+  doorPG.clear();
+  doorPG.push();
 
-    for (let i = 0; i < numLines; i++) {
-      let y = i * h;
-      displayLine(pg, 0, y, quadMapWall.width, h);
-    }
-    pg.pop();
-  });
+  if (isPlaying) {
+    let h = (doorPG.height * 19) / 20;
+    let w = (h * video.width) / video.height;
+    let x = (doorPG.width - w) / 2;
+    doorPG.image(video, x, 0, w, h);
+  }
 
-  quadMapDoor.displaySketch((pg) => {
-    pg.clear();
-    pg.push();
-
-    if (isPlaying) {
-      let h = quadMapDoor.height;
-      let w = (h * video.width) / video.height;
-      let x = (quadMapDoor.width - w) / 2;
-      pg.image(video, x, 0, w, h);
-    }
-
-    pg.noFill();
-    pg.strokeWeight(20);
-    pg.stroke(255);
-    let space = 10;
-    pg.rect(
-      0,
-      0,
-      (quadMapDoor.width * 19) / 20,
-      (quadMapDoor.height * 19) / 20
-    );
-    pg.pop();
-  });
+  doorPG.noFill();
+  doorPG.strokeWeight(20);
+  doorPG.stroke(255);
+  let space = 10;
+  doorPG.rect(0, 0, (doorPG.width * 19) / 20, (doorPG.height * 18.5) / 20);
+  doorPG.pop();
 }
 
 function mousePressed() {

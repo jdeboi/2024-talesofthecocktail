@@ -1,114 +1,77 @@
 class Playlist {
   constructor() {
-    this.songs = [];
-    this.currentSongIndex = 0;
+    this.currentSong;
     this.fft = new p5.FFT();
   }
 
   addSong(song) {
-    this.songs.push(song);
+    // this.songs.push(song);
+    this.currentSong = song;
   }
 
-  playSong(index) {
-    if (index < this.songs.length) {
-      let currentSong = this.songs[index];
-      currentSong.play();
-    }
+  playSong() {
+      this.currentSong.play();
   }
 
   nextSong() {
-    this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
-    this.playSong(this.currentSongIndex);
+    this.playSong();
   }
 
   display() {
-    let song = this.songs[this.currentSongIndex];
-    if (song) {
-      song.display();
-    }
-  }
 
+    this.currentSong.display();
+  }
+ 
   getIsPlaying() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.getIsPlaying();
-    }
-    return false;
+    return this.currentSong.getIsPlaying();
   }
 
   resetPlay() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      currentSong.resetPlay();
-    }
+
+    this.currentSong.resetPlay();
   }
 
   togglePlay() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      currentSong.togglePlay();
+    this.currentSong.togglePlay();
 
-      if (currentSong.getIsPlaying()) {
-        console.log("playing", currentSong.title);
+      if (this.currentSong.getIsPlaying()) {
+        console.log("playing", this.currentSong.title);
       } else {
-        console.log("paused", currentSong.title);
+        console.log("paused", this.currentSong.title);
       }
-    } else {
-      console.log("No songs in playlist");
-    }
   }
 
   stop() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      currentSong.stop();
-    }
+    this.currentSong.stop();
   }
 
   getCurrentMeasureBeat() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.getCurrentMeasureBeat();
-    }
-    return -1;
+
+      return this.currentSong.getCurrentMeasureBeat();
+   
   }
 
   getSecondsPerBeat() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.secondsPerBeat;
-    }
-    return -1;
+   return this.currentSong.secondsPerBeat;
+    
   }
 
   getBeatPercent() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.getBeatPercent();
-    }
-    return -1;
+   return this.currentSong.getBeatPercent();
+   
   }
 
   getBeatChanged() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.beatChanged();
-    }
-    return -1;
+      return this.currentSong.beatChanged();
   }
+
   getMeasureChanged() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.measureChanged();
-    }
-    return -1;
+    return this.currentSong.measureChanged();
+   
   }
 
   getTwoFourChanged() {
-    if (this.songs.length > 0) {
-      let currentSong = this.songs[this.currentSongIndex];
-      return currentSong.twoFourChanged();
-    }
-    return -1;
+    return this.currentSong.twoFourChanged();
+   
   }
 }
