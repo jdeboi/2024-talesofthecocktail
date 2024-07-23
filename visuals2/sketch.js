@@ -15,7 +15,7 @@ const NUM_STEPS = 4;
 
 function preload() {
   playlist = new Playlist();
-  playlist.addSong(new Song("Lalinea_Midnight_Dreams3", 85, 4, 0.5));
+  playlist.addSong(new Song("Lalinea_Midnight_Dreams2", 85, 4, 0.5));
   myFont = loadFont("../assets/Roboto.ttf");
 
   logo = loadImage("../assets/logo.png");
