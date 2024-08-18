@@ -38,7 +38,7 @@ function setup() {
 
   pMapper = createProjectionMapper(this);
 
-  quadMapWall = pMapper.createQuadMap(width, height);
+  quadMapWall = pMapper.createQuadMap(900, 900);
   quadMapDoor = pMapper.createQuadMap(360, 800);
 
   quadLogo = pMapper.createQuadMap(300, 80);
@@ -221,7 +221,7 @@ function displayDoor() {
   doorPG.strokeWeight(20);
   doorPG.stroke(255);
   let space = 10;
-  doorPG.rect(0, 0, (doorPG.width * 19) / 20, (doorPG.height * 18.5) / 20);
+  doorPG.rect(0, 0, (doorPG.width * 19) / 20, (doorPG.height * 18) / 20);
   doorPG.pop();
 }
 
